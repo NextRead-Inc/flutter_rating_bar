@@ -32,6 +32,7 @@ class RatingBar extends StatefulWidget {
     /// Customizes the Rating Bar item with [RatingWidget].
     @required RatingWidget ratingWidget,
     @required this.onRatingUpdate,
+    this.onRatingUp,
     this.glowColor,
     this.maxRating,
     this.textDirection,
@@ -59,6 +60,7 @@ class RatingBar extends StatefulWidget {
     /// {@endtemplate}
     @required IndexedWidgetBuilder itemBuilder,
     @required this.onRatingUpdate,
+    this.onRatingUp,
     this.glowColor,
     this.maxRating,
     this.textDirection,
@@ -83,6 +85,8 @@ class RatingBar extends StatefulWidget {
   ///
   /// [updateOnDrag] can be used to change the behaviour how the callback reports the update.
   final ValueChanged<double> onRatingUpdate;
+
+  final ValueChanged<double> onRatingUp;
 
   /// Defines color for glow.
   ///
@@ -291,6 +295,9 @@ class _RatingBarState extends State<RatingBar> {
     return IgnorePointer(
       ignoring: widget.ignoreGestures,
       child: GestureDetector(
+        onTapUp: (details) {
+          widget.onRatingUp(iconRating);
+        },
         onTapDown: (details) {
           double value;
           if (index == 0 && (_rating == 1 || _rating == 0.5)) {
@@ -298,7 +305,8 @@ class _RatingBarState extends State<RatingBar> {
           } else if (widget.onRatingUpdate != null) {
             final tappedPosition = details.localPosition.dx;
             final tappedOnFirstHalf = tappedPosition <= widget.itemSize / 2;
-            value = index + (tappedOnFirstHalf && widget.allowHalfRating ? 0.5 : 1.0);
+            value = index +
+                (tappedOnFirstHalf && widget.allowHalfRating ? 0.5 : 1.0);
           }
           if (value != null) {
             value = math.max(value, widget.minRating);
@@ -319,7 +327,8 @@ class _RatingBarState extends State<RatingBar> {
             valueListenable: _glow,
             builder: (context, glow, child) {
               if (glow && widget.glow) {
-                final glowColor = widget.glowColor ?? Theme.of(context).accentColor;
+                final glowColor =
+                    widget.glowColor ?? Theme.of(context).accentColor;
                 return DecoratedBox(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
@@ -385,6 +394,9 @@ class _RatingBarState extends State<RatingBar> {
   void _onDragEnd(DragEndDetails details) {
     _glow.value = false;
     widget.onRatingUpdate(iconRating);
+    if (widget.onRatingUp != null) {
+      widget.onRatingUp(iconRating);
+    }
     iconRating = 0.0;
   }
 }
