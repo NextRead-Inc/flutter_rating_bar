@@ -296,7 +296,7 @@ class _RatingBarState extends State<RatingBar> {
       ignoring: widget.ignoreGestures,
       child: GestureDetector(
         onTapUp: (details) {
-          widget.onRatingUp(iconRating);
+          widget.onRatingUp(_rating);
         },
         onTapDown: (details) {
           double value;
